@@ -16,22 +16,25 @@
 //    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 use crate::state::state;
 use crate::checkconf::checkconf;
+use std::path::Path;
+use anyhow::{Result, Context};
+use std::fs;
 
-pub fn compare() -> Result<()> {
+pub fn compare() -> Result<Vec<String>> {
     if !Path::new("/etc/state.raw").exists() {
-        state()?.context("Failed to create a state snapshot")?;
+        state().context("Failed to create a state snapshot")?;
     }
-    let (mode, local, root) = checkconf().context("Failed to get raw.conf")?
+    let (mode, local, root) = checkconf().context("Failed to get raw.conf")?;
     let mut current = String::new();
     let mut saved = String::new();
-    let root = format!("{}/index.raw", root)
+    let root = format!("{}/index.raw", root);
     let mut diff: Vec<String> = Vec::new();
     if mode == "source" {
         current = fs::read_to_string(root).context("Failed to read current index.raw")?;
         saved = fs::read_to_string("/etc/state.raw").context("Failed to parse previous state")?;
         for i in current.lines() {
             let name = i.split_once("/Pkgfile").map(|(name, _)| name).context("Failed to fetch package name")?.rsplit_once("/").map(|(_, name)| name).context("Failed to get package name")?;
-            let data: Vec<&str> = s.split(|).collect();
+            let data: Vec<&str> = i.split("|").collect();
             let ver = data.get(1).context("Failed to get current version")?;
             let rel = data.get(1).context("Failed to get current release")?;
             let saved_state = saved.lines().find(|l| l.contains(&format!("{}/", name))).context("Failed to fetch package")?;
@@ -39,11 +42,11 @@ pub fn compare() -> Result<()> {
             let saved_rel = data_saved.get(2).context("Failed to get current version")?;
             let saved_ver = data_saved.get(1).context("Failed to get current version")?;
             if saved_rel != rel || saved_ver != ver {
-                diff.push(name)
+                diff.push(name.to_string());
             } else {
                 continue;
             }
         }
     }
-
+    return Ok(diff);
 }

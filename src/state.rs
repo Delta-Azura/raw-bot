@@ -15,15 +15,20 @@
 //    with this program; if not, write to the Free Software Foundation, Inc.,
 //    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+use std::path::Path;
+use std::fs;
+use crate::checkconf::checkconf;
+use anyhow::{Result, Context};
+
 pub fn state() -> Result<()> {
     if Path::new("/etc/state.raw").exists() {
-        fs::remove_file("/etc/state.raw")
+        fs::remove_file("/etc/state.raw")?;
     }
     let (mode, local, root) = checkconf().context("Failed to get current configuration")?;
     if mode == "binary" {
         if local == true {
             fs::copy(format!("{}/index.raw", root), "/etc/state.raw").context("Failed to copy index to save the current state")?;
-            Ok()
+            return Ok(())
         } else {
             anyhow::bail!("Local variable isn't set to true, exiting");
         }
@@ -33,5 +38,5 @@ pub fn state() -> Result<()> {
             fs::copy(format!("{}/index.raw", root), "/etc/state.raw").context("Failed to copy current index.raw")?;
         }
     }
-
+    return Ok(());
 }

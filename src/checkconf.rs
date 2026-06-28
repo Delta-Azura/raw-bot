@@ -14,31 +14,36 @@
 //    You should have received a copy of the GNU General Public License along
 //    with this program; if not, write to the Free Software Foundation, Inc.,
 //    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+use anyhow::{Result, Context};
+use std::path::Path;
+use std::fs;
 
-pub fn checkconf() -> Result<(String, String, String)> {
+pub fn checkconf() -> Result<(String, bool, String)> {
     if !Path::new("/etc/raw.conf").exists() {
         anyhow::bail!("Exiting as raw.conf isn't configured")
     }
     let rawconf = fs::read_to_string("/etc/raw.conf").context("Failed to read /etc/raw.conf")?;
     let mut mode = String::new();
-    let mut local: bool;
-    let mut root: String,
+    let mut local: bool = false;
+    let mut root: String = String::new();
     if rawconf.contains("mode=binary") {
-        mode = "binary"
+        mode = "binary".to_string();
         if rawconf.lines().any(|l| l.contains("local=true")) {
             if rawconf.lines().find(|l| l.contains("local=true")).context("Failed to fetch the local line")?.starts_with("#") {
                 local = false;
             } else {
                 local = true;
-                root = rawconf.lines().find(|l| l.starts_with("root=")).context("Failed to check local repository")?.map(|(_, root)| root).context("Failed to get local path")?;
+                root = rawconf.lines().find(|l| l.starts_with("root=")).context("Failed to check local repository")?.split_once("root=").map(|(_, root)| root).context("Failed to get local path")?.to_string();
             }
+        } else {
+            local = false;
         }
         
     }
     if rawconf.contains("mode=source") {
-        mode = "source";
-        root = rawconf.lines().find(|l| l.starts_with("root=")).context("Failed to get path to pkgfiles")?.map(|(_, root)| root).context("Failed to get root path")?;
+        mode = "source".to_string();
+        root = rawconf.lines().find(|l| l.starts_with("root=")).context("Failed to get path to pkgfiles")?.split_once("root=").map(|(_, root)| root).context("Failed to get root path")?.to_string();
         local = false;
     }
-    Ok((mode, local, root))
+    Ok((mode, local, root.to_string()))
 }

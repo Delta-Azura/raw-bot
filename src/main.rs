@@ -15,6 +15,17 @@
 //    with this program; if not, write to the Free Software Foundation, Inc.,
 //    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-fn main() {
+mod building;
+mod checkconf;
+mod state;
+mod compare;
+use crate::building::building;
+use anyhow::{Result};
+use crate::state::state;
+
+fn main() -> Result<()> {
     println!("Hello, world!");
+    state()?;
+    building()?;
+    return Ok(());
 }
