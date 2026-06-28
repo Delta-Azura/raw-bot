@@ -22,14 +22,16 @@ pub fn state() -> Result<()> {
     let (mode, local, root) = checkconf().context("Failed to get current configuration")?;
     if mode == "binary" {
         if local == true {
-            fs::copy(format!("{}/index.raw", "/etc/state.raw")).context("Failed to copy index to save the current state")?;
+            fs::copy(format!("{}/index.raw", root), "/etc/state.raw").context("Failed to copy index to save the current state")?;
             Ok()
         } else {
             anyhow::bail!("Local variable isn't set to true, exiting");
         }
     }
     if mode == "source" {
-        
+        if local == true {
+            fs::copy(format!("{}/index.raw", root), "/etc/state.raw").context("Failed to copy current index.raw")?;
+        }
     }
 
 }
