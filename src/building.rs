@@ -15,14 +15,10 @@
 //    with this program; if not, write to the Free Software Foundation, Inc.,
 //    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-use crate::state::state;
-
-use crate::compare::compare;
 use anyhow::{Result, Context};
 use std::fs;
 
-pub fn building() -> Result<()> {
-    let packages: Vec<String> = compare().context("Failed to compare")?;
+pub fn building(path: String) -> Result<()> {
     let configuration = fs::read_to_string("/etc/raw-bot/building").context("Shell script doesn't exist")?;
     if configuration.is_empty() {
         anyhow::bail!("The environment setup instructions are empty")
