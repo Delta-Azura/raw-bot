@@ -17,11 +17,19 @@
 
 use anyhow::{Result, Context};
 use std::fs;
+use raw::package;
+use std::env;
 
 pub fn building(path: String) -> Result<()> {
-    let configuration = fs::read_to_string("/etc/raw-bot/building").context("Shell script doesn't exist")?;
-    if configuration.is_empty() {
-        anyhow::bail!("The environment setup instructions are empty")
+    //let configuration = fs::read_to_string("/etc/raw-bot/building").context("Shell script doesn't exist")?;
+    env::set_current_dir(&path)?;
+    match package(None) {
+        Ok(_) => {
+            println!("Building succeded in {}", path);
+        }
+        Err(e) => {
+            println!("{}", e);
+        }
     }
     return Ok(());
 }
