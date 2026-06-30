@@ -25,6 +25,7 @@ use std::path::Path;
 pub fn building(path: String) -> Result<()> {
     env::set_current_dir(&path)?;
     let pkgfile = fs::read_to_string("Pkgfile")?;
+    let name = pkgfile.lines().find(|l| l.starts_with("name=")).context("Failed to get package name")?.split_once("name=").map(|(_, name)| name).context("Failed to get package name")?;
     let version = pkgfile.lines().find(|l| l.starts_with("version=")).context("Failed to get version line")?.split_once("version=").map(|(_, version)| version).context("Failed to get updated version")?;
     let release = pkgfile.lines().find(|l| l.starts_with("release=")).context("Failed to get release line")?.split_once("release=").map(|(_, release)| release).context("Failed to get updated release")?;
 
@@ -42,6 +43,8 @@ pub fn building(path: String) -> Result<()> {
             }
         }
         Err(e) => {
+            File::create(format!("/var/cache/raw-bot.d/{}.log", name)).context("Failed to create log file")?;
+            fs::write(format!("/var/cache/raw-bot.d/{}.log", name), e.to_string()).context("Failed to write the log error")?;
             let log = log.lines().find(|l| l.starts_with(&path)).context("Failed to get the line")?;
             let modified = log.replace(log, &format!("{}|{}|{}|failed", path, version, release));
             fs::write("/var/cache/raw-bot.log", modified).context("Failed to log properly")?;
