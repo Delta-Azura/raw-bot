@@ -19,6 +19,8 @@ mod building;
 mod checkconf;
 mod state;
 mod compare;
+mod update;
+use crate::update::auto;
 use crate::building::building;
 use anyhow::{Result};
 use crate::state::state;
