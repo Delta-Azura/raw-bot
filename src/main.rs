@@ -21,7 +21,6 @@ mod update;
 use crate::update::auto;
 use crate::building::building;
 use anyhow::{Result};
-use raw::package;
 
 fn main() -> Result<()> {
     println!("Hello, world!");

@@ -30,7 +30,12 @@ pub fn auto() -> Result<()> {
                 .replace(currentver, &format!("version={}", version))
                 .replace(currentrel, &format!("release={}", release));
             fs::write(format!("{}/{}/Pkgfile", root, path), modified).context("Failed to remove pkgfile")?;
-            building(format!("{}/{}", root, path))?;
+            match building(format!("{}/{}", root, path)) {
+                Ok(_) => {}
+                Err(e) => {
+                    eprintln!("failed {}", e);
+                }
+            }
         }
     } else {
         thread::sleep(Duration::from_hours(2));

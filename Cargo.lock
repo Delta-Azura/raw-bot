@@ -1074,7 +1074,7 @@ dependencies = [
 [[package]]
 name = "raw"
 version = "0.1.0"
-source = "git+https://github.com/Delta-Azura/raw#866d5e0f8924880ec3ee49be7c9379da3794bf04"
+source = "git+https://github.com/Delta-Azura/raw#5de47eb7786715ff8b59e742187e4c1917ffbbee"
 dependencies = [
  "anyhow",
  "compress-tools",
